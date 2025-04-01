@@ -46,7 +46,9 @@
             students.first_name.toLowerCase().includes(query) || 
             students.last_name.toLowerCase().includes(query) || 
             students.degree_program.toLowerCase().includes(query) || 
-            students.degree_classification.toLowerCase().includes(query)
+            students.degree_classification.toLowerCase().includes(query) ||
+            students.employed_status.toLowerCase().includes(query) || 
+            students.email.toLowerCase().includes(query)
           );
 
           displayResults(results);
@@ -71,4 +73,3 @@
   </script>
 </body>
 </html>
-
