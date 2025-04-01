@@ -56,20 +56,29 @@
         .catch(error => console.error('Error:', error));
     }
 
-    function displayResults(results) {
-      const resultsContainer = document.getElementById('results');
-      resultsContainer.innerHTML = ''; // Clear previous results
+  function displayResults(results) {
+  const resultsContainer = document.getElementById('results');
+  resultsContainer.innerHTML = ''; // Clear previous results
 
-      if (results.length > 0) {
-        results.forEach(students => {
-          const resultStudents = document.createElement('p');
-          resultStudents.textContent = `${students.first_name} ${students.last_name} , ${students.degree_program} (${students.degree_classification})`;
-          resultsContainer.appendChild(resultStudents);
-        });
+  if (results.length > 0) {
+    results.forEach(student => {
+      // Determine highest degree based on classification
+      let highest_degree = '';
+      if (student.degree_classification.toLowerCase() === 'graduate') {
+        highest_degree = "Bachelor's Degree";
       } else {
-        resultsContainer.textContent = 'No results found';
+        highest_degree = 'Diploma/GED';
       }
-    }
+
+      const resultStudent = document.createElement('p');
+      resultStudent.textContent = `Name: ${student.first_name} ${student.last_name}, Degree Program: ${student.degree_program}, Highest Degree: ${highest_degree}, ${student.email}`;
+      resultsContainer.appendChild(resultStudent);
+    });
+
+  } else {
+    resultsContainer.textContent = 'No results found';
+  }
+}
   </script>
 </body>
 </html>
