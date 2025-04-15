@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
- 
+<head>
+  <meta charset="UTF-8" />
   <title>Student Search</title>
   <style>
     body {
@@ -20,9 +21,16 @@
       padding: 10px 20px;
       font-size: 16px;
       cursor: pointer;
+      margin-top: 5px;
     }
     .results {
       margin-top: 20px;
+    }
+    .student-card {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: left;
+      margin-bottom: 10px;
     }
   </style>
 </head>
@@ -34,76 +42,77 @@
     <div class="results" id="results"></div>
   </div>
 
+  <!-- jsPDF CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
   <script>
-    // Pagination variables
     let filterResults = [];
     let currentPage = 1;
     const resultsPerPage = 10;
-  
+
     function searchItems() {
       const query = document.getElementById('searchInput').value.toLowerCase();
-  
+
       fetch('http://localhost:3000/students')
         .then(response => response.json())
         .then(data => {
-          const results = data.filter(student => 
-          student.first_name.toLowerCase().includes(query) || 
-          student.last_name.toLowerCase().includes(query) || 
-          student.degree_program.toLowerCase().includes(query) ||
-          (student.GPA && student.GPA.toString().includes(query)) ||
-          student.degree_classification.toLowerCase().includes(query) ||
-          student.employed_status.toLowerCase().includes(query) || 
-          student.email.toLowerCase().includes(query)
-        );
-        
-        //Sort by last name
-        results.sort((a, b) => a.last_name.localeCompare(b.last_name));
+          const results = data.filter(student =>
+            student.first_name.toLowerCase().includes(query) ||
+            student.last_name.toLowerCase().includes(query) ||
+            student.degree_program.toLowerCase().includes(query) ||
+            (student.GPA && student.GPA.toString().includes(query)) ||
+            student.degree_classification.toLowerCase().includes(query) ||
+            student.employed_status.toLowerCase().includes(query) ||
+            student.email.toLowerCase().includes(query)
+          );
 
-        filterResults = results;
-        currentPage = 1;
-        displayPaginatedResults();
+          results.sort((a, b) => a.last_name.localeCompare(b.last_name));
+          filterResults = results;
+          currentPage = 1;
+          displayPaginatedResults();
         })
         .catch(error => console.error('Error:', error));
     }
-  
+
     function displayPaginatedResults() {
       const resultsContainer = document.getElementById('results');
-      resultsContainer.innerHTML = ''; // Clear previous results
-  
+      resultsContainer.innerHTML = '';
+
       const startIndex = (currentPage - 1) * resultsPerPage;
       const endIndex = startIndex + resultsPerPage;
       const paginatedResults = filterResults.slice(startIndex, endIndex);
-  
+
       if (paginatedResults.length > 0) {
         paginatedResults.forEach(student => {
-          const resultStudent = document.createElement('p');
+          const resultStudent = document.createElement('div');
+          resultStudent.className = 'student-card';
           resultStudent.innerHTML = `
-          <strong>Name:</strong> ${student.first_name} ${student.last_name}<br>
-          <strong>Email:</strong> ${student.email}<br>
-          <strong>GPA:</strong> ${student.GPA}<br>
-          <strong>Degree Classification:</strong> ${student.degree_classification}<br>
-          <strong>Program:</strong> ${student.degree_program}<br>
-          <strong>Employment Status:</strong> ${student.employed_status}<br>
-          <hr>
+            <p><strong>Name:</strong> ${student.first_name} ${student.last_name}</p>
+            <p><strong>Email:</strong> ${student.email}</p>
+            <p><strong>GPA:</strong> ${student.GPA}</p>
+            <p><strong>Degree Classification:</strong> ${student.degree_classification}</p>
+            <p><strong>Program:</strong> ${student.degree_program}</p>
+            <p><strong>Employment Status:</strong> ${student.employed_status}</p>
+            <button onclick='generatePDF(${JSON.stringify(student)})'>Export to PDF</button>
           `;
           resultsContainer.appendChild(resultStudent);
         });
-  
+
         renderPaginationControls();
       } else {
         resultsContainer.textContent = 'No results found';
       }
     }
-  
+
     function renderPaginationControls() {
       const resultsContainer = document.getElementById('results');
       const totalPages = Math.ceil(filterResults.length / resultsPerPage);
       if (totalPages <= 1) return;
-  
+
       const paginationDiv = document.createElement('div');
       paginationDiv.className = 'pagination';
       paginationDiv.style.marginTop = '20px';
-  
+
       for (let i = 1; i <= totalPages; i++) {
         const btn = document.createElement('button');
         btn.textContent = i;
@@ -114,8 +123,33 @@
         };
         paginationDiv.appendChild(btn);
       }
-  
+
       resultsContainer.appendChild(paginationDiv);
+    }
+
+    async function generatePDF(student) {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+
+      doc.setFontSize(16);
+      doc.text("Student Details", 20, 20);
+
+      doc.setFontSize(12);
+      const lines = [
+        `Name: ${student.first_name} ${student.last_name}`,
+        `Email: ${student.email}`,
+        `GPA: ${student.GPA}`,
+        `Degree Classification: ${student.degree_classification}`,
+        `Program: ${student.degree_program}`,
+        `Employment Status: ${student.employed_status}`
+      ];
+
+      lines.forEach((line, index) => {
+        doc.text(line, 20, 40 + (index * 10));
+      });
+
+      const filename = `${student.last_name}_${student.first_name}_profile.pdf`;
+      doc.save(filename);
     }
   </script>
 </body>
