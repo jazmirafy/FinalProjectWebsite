@@ -3,154 +3,153 @@
 <head>
   <meta charset="UTF-8" />
   <title>Student Search</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-    }
-    .search-container {
-      margin: 50px auto;
-      max-width: 400px;
-      text-align: center;
-    }
-    input[type="text"] {
-      padding: 10px;
-      width: 250px;
-      font-size: 16px;
-    }
-    button {
-      padding: 10px 20px;
-      font-size: 16px;
-      cursor: pointer;
-      margin-top: 5px;
-    }
-    .results {
-      margin-top: 20px;
-    }
-    .student-card {
-      border: 1px solid #ccc;
-      padding: 10px;
-      text-align: left;
-      margin-bottom: 10px;
-    }
-  </style>
+  <link rel="stylesheet" href="style.css?v=1.29">
+  
 </head>
-<body>
-  <div class="search-container">
-    <h1>Search for Students</h1>
-    <input type="text" id="searchInput" placeholder="Search by name or category...">
-    <button onclick="searchItems()">Search</button>
-    <div class="results" id="results"></div>
-  </div>
+  <body>
+    <div class="search-container">
+      <h1>Search for Students</h1>
+      <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="Search by name, degree, or email">
+        <button class="search-button" onclick="searchItems()">Search</button>
+      </div>
+      <div class="table-container">
+        <table class="nav">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Degree Classification</th>
+            </tr>
+          </thead>
+          <tbody id="results">
+            <!-- Results will be inserted here -->
+          </tbody>
+        </table>
+      </div>
+    </div>
 
-  <!-- jsPDF CDN -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- jsPDF CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-  <script>
-    let filterResults = [];
-    let currentPage = 1;
-    const resultsPerPage = 10;
+    <script>
+      let filterResults = [];
+      let currentPage = 1;
+      const resultsPerPage = 10;
 
-    function searchItems() {
-      const query = document.getElementById('searchInput').value.toLowerCase();
+      function searchItems() {
+        const query = document.getElementById('searchInput').value.toLowerCase();
 
-      fetch('http://localhost:3000/students')
-        .then(response => response.json())
-        .then(data => {
-          const results = data.filter(student =>
-            student.first_name.toLowerCase().includes(query) ||
-            student.last_name.toLowerCase().includes(query) ||
-            student.degree_program.toLowerCase().includes(query) ||
-            (student.GPA && student.GPA.toString().includes(query)) ||
-            student.degree_classification.toLowerCase().includes(query) ||
-            student.employed_status.toLowerCase().includes(query) ||
-            student.email.toLowerCase().includes(query)
-          );
+        fetch('http://localhost:3000/students')
+          .then(response => response.json())
+          .then(data => {
+            const results = data.filter(student =>
+              student.first_name.toLowerCase().includes(query) ||
+              student.last_name.toLowerCase().includes(query) ||
+              student.degree_program.toLowerCase().includes(query) ||
+              (student.GPA && student.GPA.toString().includes(query)) ||
+              student.degree_classification.toLowerCase().includes(query) ||
+              student.employed_status.toLowerCase().includes(query) ||
+              student.email.toLowerCase().includes(query)
+            );
 
-          results.sort((a, b) => a.last_name.localeCompare(b.last_name));
-          filterResults = results;
-          currentPage = 1;
-          displayPaginatedResults();
-        })
-        .catch(error => console.error('Error:', error));
-    }
+            results.sort((a, b) => a.last_name.localeCompare(b.last_name));
+            filterResults = results;
+            currentPage = 1;
+            displayPaginatedResults();
+          })
+          .catch(error => console.error('Error:', error));
+      }
 
-    function displayPaginatedResults() {
-      const resultsContainer = document.getElementById('results');
-      resultsContainer.innerHTML = '';
+      function displayPaginatedResults() {
+        const resultsContainer = document.getElementById('results');
+        resultsContainer.innerHTML = '';
 
-      const startIndex = (currentPage - 1) * resultsPerPage;
-      const endIndex = startIndex + resultsPerPage;
-      const paginatedResults = filterResults.slice(startIndex, endIndex);
+        const startIndex = (currentPage - 1) * resultsPerPage;
+        const endIndex = startIndex + resultsPerPage;
+        const paginatedResults = filterResults.slice(startIndex, endIndex);
 
-      if (paginatedResults.length > 0) {
-        paginatedResults.forEach(student => {
-          const resultStudent = document.createElement('div');
-          resultStudent.className = 'student-card';
-          resultStudent.innerHTML = `
-            <p><strong>Name:</strong> ${student.first_name} ${student.last_name}</p>
-            <p><strong>Email:</strong> ${student.email}</p>
-            <p><strong>GPA:</strong> ${student.GPA}</p>
-            <p><strong>Degree Classification:</strong> ${student.degree_classification}</p>
-            <p><strong>Program:</strong> ${student.degree_program}</p>
-            <p><strong>Employment Status:</strong> ${student.employed_status}</p>
-            <button onclick='generatePDF(${JSON.stringify(student)})'>Export to PDF</button>
-          `;
-          resultsContainer.appendChild(resultStudent);
+        if (paginatedResults.length > 0) {
+          paginatedResults.forEach(student => {
+            const row = document.createElement('tr');
+
+            row.innerHTML = `
+              <td>
+                <a href="#" onclick='event.preventDefault(); generatePDF(${JSON.stringify(student)})'>
+                  ${student.first_name} ${student.last_name}
+                </a>
+              </td>
+              <td>${student.email}</td>
+              <td>${student.degree_classification}</td>
+            `;
+
+            resultsContainer.appendChild(row);
+          });
+
+          renderPaginationControls();
+        } else {
+          const row = document.createElement('tr');
+          row.innerHTML = `<td colspan="3">No results found</td>`;
+          resultsContainer.appendChild(row);
+        }
+      }
+
+      function renderPaginationControls() {
+        const resultsContainer = document.getElementById('results');
+        const totalPages = Math.ceil(filterResults.length / resultsPerPage);
+        if (totalPages <= 1) return;
+
+        // Create a row and cell for pagination
+        const paginationRow = document.createElement('tr');
+        const paginationCell = document.createElement('td');
+        paginationCell.colSpan = 3; // Span all columns
+        paginationCell.style.textAlign = 'center'; // Center the buttons
+
+        const paginationDiv = document.createElement('div');
+        paginationDiv.className = 'pagination';
+        paginationDiv.style.marginTop = '20px';
+
+        for (let i = 1; i <= totalPages; i++) {
+          const btn = document.createElement('button');
+          btn.textContent = i;
+          btn.disabled = (i === currentPage);
+          btn.onclick = () => {
+            currentPage = i;
+            displayPaginatedResults();
+          };
+          paginationDiv.appendChild(btn);
+        }
+
+        paginationCell.appendChild(paginationDiv);
+        paginationRow.appendChild(paginationCell);
+        resultsContainer.appendChild(paginationRow);
+      }
+
+
+      async function generatePDF(student) {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+
+        doc.setFontSize(16);
+        doc.text("Student Details", 20, 20);
+
+        doc.setFontSize(12);
+        const lines = [
+          `Name: ${student.first_name} ${student.last_name}`,
+          `Email: ${student.email}`,
+          `GPA: ${student.GPA}`,
+          `Degree Classification: ${student.degree_classification}`,
+          `Program: ${student.degree_program}`,
+          `Employment Status: ${student.employed_status}`
+        ];
+
+        lines.forEach((line, index) => {
+          doc.text(line, 20, 40 + (index * 10));
         });
 
-        renderPaginationControls();
-      } else {
-        resultsContainer.textContent = 'No results found';
+        const filename = `${student.last_name}_${student.first_name}_profile.pdf`;
+        doc.save(filename);
       }
-    }
-
-    function renderPaginationControls() {
-      const resultsContainer = document.getElementById('results');
-      const totalPages = Math.ceil(filterResults.length / resultsPerPage);
-      if (totalPages <= 1) return;
-
-      const paginationDiv = document.createElement('div');
-      paginationDiv.className = 'pagination';
-      paginationDiv.style.marginTop = '20px';
-
-      for (let i = 1; i <= totalPages; i++) {
-        const btn = document.createElement('button');
-        btn.textContent = i;
-        btn.disabled = (i === currentPage);
-        btn.onclick = () => {
-          currentPage = i;
-          displayPaginatedResults();
-        };
-        paginationDiv.appendChild(btn);
-      }
-
-      resultsContainer.appendChild(paginationDiv);
-    }
-
-    async function generatePDF(student) {
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
-
-      doc.setFontSize(16);
-      doc.text("Student Details", 20, 20);
-
-      doc.setFontSize(12);
-      const lines = [
-        `Name: ${student.first_name} ${student.last_name}`,
-        `Email: ${student.email}`,
-        `GPA: ${student.GPA}`,
-        `Degree Classification: ${student.degree_classification}`,
-        `Program: ${student.degree_program}`,
-        `Employment Status: ${student.employed_status}`
-      ];
-
-      lines.forEach((line, index) => {
-        doc.text(line, 20, 40 + (index * 10));
-      });
-
-      const filename = `${student.last_name}_${student.first_name}_profile.pdf`;
-      doc.save(filename);
-    }
-  </script>
-</body>
+    </script>
+  </body>
 </html>

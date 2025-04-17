@@ -1,0 +1,129 @@
+body {
+    background: #FDFAF5;
+  }
+  .search-container {
+    margin: 50px auto;
+    text-align: center;
+  }
+  
+  .search-bar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px; /* space between input and button */
+    margin-top: 20px;
+  }
+  
+  input[type="text"] {
+    color: #4E82CC;
+    -webkit-text-stroke-width: 1px;
+    -webkit-text-stroke-color: #4E82CC;
+    font-family: Anuphan;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 150%; /* 30px */
+    letter-spacing: 1px;
+    text-transform: capitalize;
+    flex-direction: column;
+    width: 772.499px;
+    height: 60px;
+    flex-shrink: 0;
+    border-radius: 24px;
+    border: 6px solid #CADBF4;
+    background: #FFFCF4;
+  }
+  .search-button {
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    width: 145.782px;
+    height: 60px;
+    flex-shrink: 0;
+    border-radius: 24px;
+    border: 6px solid #5084CD;
+    background: #5386D0;
+    color: #FEFEFD;
+    font-family: "Abril Fatface";
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 150%; /* 30px */
+    letter-spacing: 1px;
+    text-transform: capitalize;
+  }
+  .results {
+    margin-top: 20px;
+  }
+  /* .student-card {
+    border: 1px solid #ccc;
+    padding: 10px;
+    text-align: left;
+    margin-bottom: 10px;
+  } */
+  
+  h1{
+    color: #0B3463;
+    font-family: "Abril Fatface";
+    font-size: 78px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 150%; /* 117px */
+    letter-spacing: 3.9px;
+    text-transform: capitalize;
+  }
+  
+  .table-container {
+    max-width: 850px;
+    margin: 20px auto;
+    border-radius: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    overflow-x: auto;
+  }
+  
+  table.nav {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: Anuphan;
+    font-size: 20px;
+    color: #0B3463;
+    background: #F8FAFB;
+  }
+  
+  table.nav th,
+  table.nav td {
+    padding: 16px;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+    text-transform: capitalize;
+    line-height: 150%; /* 30px */
+    letter-spacing: 1px;
+  }
+  
+  table.nav th {
+    background-color: #4E82CC;
+    color: #FFF;
+    font-weight: 400;
+  }
+  
+  table.nav td:nth-child(3),
+  table.nav th:nth-child(3) {
+    white-space: nowrap;
+  }
+  
+  .pagination button {
+    margin: 0 5px;
+    padding: 6px 12px;
+    font-size: 16px;
+    border-radius: 6px;
+    border: none;
+    background-color: #5084CD;
+    color: white;
+    cursor: pointer;
+  }
+  
+  .pagination button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+  }
+  
